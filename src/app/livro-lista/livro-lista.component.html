@@ -1,0 +1,39 @@
+<main class="container my-5">
+    <h1 class="mb-4">Catálogo de Livros</h1>
+
+    <table class="table table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th class="col-2">Título</th>
+                <th class="col-6">Resumo</th>
+                <th class="col-2">Editora</th>
+                <th class="col-2">Autores</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Repetição para cada livro no vetor livros -->
+            <tr *ngFor="let livro of livros">
+                <td>
+                    {{ livro.titulo }}
+                    <div>
+                        <button class="btn btn-danger" (click)="excluir(livro.codigo)">
+                            Excluir
+                        </button>
+                    </div>
+                </td>
+                <td>{{ livro.resumo}}</td>
+
+
+
+                <td>{{ obterNome(livro.codEditora) }}</td>
+
+                <td>
+                    <ul>
+                        <!-- Repetição para cada autor no vetor autores do livro -->
+                        <li *ngFor="let autor of livro.autores">{{ autor }}</li>
+                    </ul>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</main>
