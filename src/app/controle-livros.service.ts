@@ -1,41 +1,97 @@
 import { Injectable } from '@angular/core';
-import { Livro } from './livro';
+import {Livro}  from './livro';
+
+const baseURL = "http://localhost:3030/livros"; // Endereço do servidor Express
+
+
+interface LivroMongo {
+  _id?: string;  
+  codEditora: number;
+  titulo: string;
+  resumo: string;
+  autores: string[];
+}
 
 @Injectable({
   providedIn: 'root'
 })
 
 export class ControleLivrosService {
-  // Definindo o atributo livros com alguns elementos
-  private livros: Array<Livro> = [
-    { codigo: 1, codEditora: 1, titulo: 'Use a cabeça: Java', resumo: 'Use a cabeça! Java é uma experiência completa de aprendizado em programação orientada a objetos(OO) e Java', autores: ['Bert Bates, Kathy Sierra'] },
-    { codigo: 2, codEditora: 2, titulo: 'Java, como programar', resumo: 'Milhões de alunos e profissionais aprenderam programação e desenvolvimento de software com os livros Deitel', autores: ['Paul Deitel", "Harvey Deitel'] },
-    { codigo: 3, codEditora: 3, titulo: 'Core Java for the impatien', resumo: "Readers familiar with Horstmann's original, two-volume 'Core Java' books who are looking for a comprehensive, but condensed guide to all of the new features and functions of Java SE 9 will learn how these new features impact the language and core libraries.", autores: ['Cay Horstmann'] }
-  ];
 
   constructor() { }
 
-  // Método que retorna o vetor livros
-  obterLivros(): Array<Livro> {
-    return this.livros;
+  
+  async obterLivros(): Promise<Livro[]> {
+    try {
+      const response = await fetch(baseURL);
+      
+      if (!response.ok) {
+        throw new Error(`Falha ao buscar livros: ${response.statusText}`);
+      }
+
+      const livrosMongo: LivroMongo[] = await response.json();
+
+      
+      return livrosMongo.map(livro => ({
+        _id: livro._id || '',  
+        codEditora: livro.codEditora,
+        titulo: livro.titulo,
+        resumo: livro.resumo,
+        autores: livro.autores
+      }));
+    } catch (error) {
+      console.error("Erro ao obter livros:", error);
+      throw error;
+    }
   }
 
-  // Método para incluir um novo livro no vetor
-  incluir(livro: Livro): void {
-    // Obtendo o código mais alto e incrementando para o novo livro
-    const novoCodigo = (this.livros.length > 0) ? Math.max(...this.livros.map(l => l.codigo)) + 1
-      : 1;
-    livro.codigo = novoCodigo;
+  
+  async excluir(codigo: string): Promise<boolean> {
+    try {
+      const response = await fetch(`${baseURL}/${codigo}`, {
+        method: 'DELETE',
+      });
 
-    // Adicionando o livro ao vetor
-    this.livros.push(livro);
+      if (!response.ok) {
+        throw new Error(`Falha ao excluir livro: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      return data.ok || false;  
+    } catch (error) {
+      console.error("Erro ao excluir livro:", error);
+      return false;
+    }
   }
 
-  // Método para excluir um livro pelo código
-  excluir(codigo: number): void {
-    const index = this.livros.findIndex(l => l.codigo == codigo);
-    if (index >= 0) {
-      this.livros.splice(index, 1);
+  
+  async incluir(livro: Livro): Promise<boolean> {
+    try {
+      
+      const livroMongo: LivroMongo = {
+        codEditora: livro.codEditora,
+        titulo: livro.titulo,
+        resumo: livro.resumo,
+        autores: livro.autores
+      };
+
+      const response = await fetch(baseURL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(livroMongo),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Falha ao incluir livro: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      return data.ok || false; 
+    } catch (error) {
+      console.error("Erro ao incluir livro:", error);
+      return false;
     }
   }
 }

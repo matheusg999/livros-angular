@@ -1,12 +1,12 @@
 export class Livro {
-    codigo: number;
+    _id?: string;
     codEditora: number;
     titulo: string;
     resumo: string;
     autores: string[];
 
-    constructor(codigo: number = 0, codEditora: number = 0, titulo: string = '', resumo: string = '', autores: string[] = []) {
-        this.codigo = codigo;
+    constructor(_id?: string, codEditora: number = 0, titulo: string = '', resumo: string = '', autores: string[] = []) {
+        this._id = _id;
         this.codEditora = codEditora;
         this.titulo = titulo;
         this.resumo = resumo;
